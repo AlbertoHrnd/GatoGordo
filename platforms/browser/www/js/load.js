@@ -8,12 +8,14 @@ var loadState = {
 
       	game.load.image('bg', 'assets/kitchen.png');
 
-     	game.load.image('gato', 'assets/cat1.png');
+     	game.load.image('gato', 'assets/cat1.png');     	
 		for (i=1;i<16;i++) {
 			game.load.spritesheet('gato'+i, 'assets/cat'+i+'.png');
 		}
 
 		game.load.image('sardina', 'assets/sardina.png');
+		game.load.image('brocoli', 'assets/brocoli.png');
+		game.load.image('kk', 'assets/kk.png');
 
 		for (i=1;i<4;i++) {
 		game.load.image('bola'+i, 'assets/bola'+i+'.png');

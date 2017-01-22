@@ -2,7 +2,7 @@
 <widget id="com.albertoHrndz.juegoGato" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:gap="http://phonegap.com/ns/1.0">
     <name>JuegoGato</name>
     <description>
-        A blank PhoneGap app.
+        Un juego de un gato que engorda comiendo sardinas.
     </description>
     <author email="albertohm76@gmail.com">
     	Alberto Hernández
