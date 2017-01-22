@@ -1,10 +1,6 @@
-# A Blank PhoneGap App
+# Juego Gato PhoneGap
 
-## Usage
-
-### PhoneGap CLI
-
-    $ phonegap create my-app --template blank
+    Desarrollado para el curso de Aplicaciones móviles
 
 ### Desktop
 
