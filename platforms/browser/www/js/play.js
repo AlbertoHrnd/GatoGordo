@@ -180,16 +180,15 @@ var playState={
         game.state.start("gameOver",true,false,puntuacion);
       }
 
-      if (gordo < 14) {
+      if (gordo <= 14) {
+        if (gordo == 14) {
+          avisoGordoText.text = "El gato está muy gordo!!";
+        }
         factorVelocidad = factorVelocidad - 20;
         gato.loadTexture('gato' + gordo, 0);
         peso = 2 + ((gordo-1)/2);
         pesoText.text= peso + " Kilos";
-      }
-
-      if (gordo == 14) {
-        avisoGordoText.text = "El gato está muy gordo!!";
-      }
+      }      
   },
 
   adelgazaGato: function() {
