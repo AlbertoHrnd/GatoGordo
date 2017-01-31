@@ -10,15 +10,18 @@ var playState={
     tempSardinas=0;
     tempBolas=0;
     tempBrocolis=0;
+    tempAguas=0;
 
     contSardinas=0;
     contGolpesBolas=0;
+    contMojado=0;
 
     updateIntervalSardinas=1;
     updateIntervalBolas=1;
     updateIntervalBrocolis=1;
+    updateIntervalAguas=1;
 
-    kkIzq=0;
+    kkIzq=-50;
     kkDer=ancho;
 
     this.vigilaSensores();
@@ -33,13 +36,15 @@ var playState={
     brocolis = game.add.group();
     kksDerecha = game.add.group();
     kksIzquierda = game.add.group();
+    aguas = game.add.group();
 
-    game.physics.enable([ gato, sardinas, bolas, brocolis, kksIzquierda, kksDerecha ], Phaser.Physics.ARCADE);
+    game.physics.enable([ gato, sardinas, bolas, brocolis, kksIzquierda, kksDerecha, aguas ], Phaser.Physics.ARCADE);
 
     gato.body.collideWorldBounds = true;
     gato.body.immovable = true;
-    gato.body.bounce.set(0);
-    gato.body.allowGravity = false;
+    //gato.body.bounce.set(0);
+    //gato.body.allowGravity = false;
+    gato.body.gravity.y=200+(gordo*30);
     gato.anchor.x = 0.5;
 
     sardinas.enableBody = true;
@@ -49,13 +54,16 @@ var playState={
     brocolis.enableBody = true;
 
     kksDerecha.enableBody = true;
-    kksIzquierda.enableBody = true; 
+    kksIzquierda.enableBody = true;
+
+    aguas.enableBody = true; 
 
     game.input.onDown.add(this.engordaGato, this);    
   },
 
   update: function() {
     gato.body.velocity.x = velocidad * factorVelocidad;
+    gato.body.gravity.y=400+(gordo*40);
 
     if (velocidad<-0.2) {
       gato.scale.x = -1;
@@ -65,6 +73,7 @@ var playState={
 
     game.physics.arcade.overlap(gato, sardinas, this.comeSardina, null, this);
     game.physics.arcade.overlap(gato, brocolis, this.plantaPino, null, this);
+    game.physics.arcade.overlap(gato, aguas, this.mojaGato, null, this);
 
     game.physics.arcade.collide(gato, bolas);
     game.physics.arcade.collide(gato, kksDerecha);
@@ -96,6 +105,20 @@ var playState={
       this.brocolisOut();
       updateIntervalBrocolis = Math.floor(Math.random() * 10) * 30; // 0 - 10sec @ 30fps
       tempBrocolis= 0;
+    }
+
+    tempAguas++;
+    if (tempAguas > updateIntervalAguas){
+
+      lado = Math.floor(Math.random() * 2);
+      if (lado === 1) {
+        lado = ancho;
+      }
+      console.log(lado);
+
+      this.aguasOut(lado);
+      updateIntervalAguas = Math.floor(Math.random() * 10) * 30; // 0 - 10sec @ 30fps
+      tempAguas = 0;
     }
   },
 
@@ -141,6 +164,24 @@ var playState={
       brocoli.outOfBoundsKill = true;      
   },
 
+  aguasOut: function(lado){
+      var agua = aguas.create(lado, 50, 'agua');
+
+      velocidadBola = Math.floor(Math.random() * 400)+50;
+
+      if (lado>0) {
+        agua.body.velocity.setTo(-velocidadBola,-50);
+      } else {
+        agua.body.velocity.setTo(velocidadBola,-50);
+      }
+
+      agua.body.gravity.y=400;
+
+      // Cuando el agua sale del mundo la elimina.
+      agua.checkWorldBounds = true;
+      agua.outOfBoundsKill = true; 
+  },
+
   comeSardina: function(gato, sardina) {
       sardina.destroy();
       contSardinas++;
@@ -166,6 +207,19 @@ var playState={
       kk.body.moves=false;
 
       game.time.events.add(Phaser.Timer.SECOND * 5, this.quitakk, kk);
+  },
+
+  mojaGato: function(gato, agua) {
+    agua.destroy();
+    contMojado++;
+    if (contMojado === 5) {
+      game.state.start("gameOver",true,false,puntuacion);
+    }
+    if (contMojado == 4) {
+      avisoText.text = "El gato se va a constipar!!";
+    }
+    mojadoText.text = contMojado;
+    gato.body.velocity.y=-200;
   },
 
   controlaKks: function() {
@@ -199,7 +253,7 @@ var playState={
 
     // Comprobamos kks a la izquierda
     if (kksIzquierda.countLiving() === 0) {   // Si no queda ninguna  
-      kkIzq=0;                                // Reseteamos a 0 
+      kkIzq=-50;                                // Reseteamos a 0 
     } else {                                  // Si quedan
       kksDerecha.forEachAlive(function(kk) {  // Para cada kk que quede
         if (kk.x > kkADestruir.x) {           // Si esa kk está a la derecha de la destruida
@@ -232,7 +286,7 @@ var playState={
 
       if (gordo <= 14) {
         if (gordo == 14) {
-          avisoGordoText.text = "El gato está muy gordo!!";
+          avisoText.text = "El gato está muy gordo!!";
         }
         factorVelocidad = factorVelocidad - 20;
         gato.loadTexture('gato' + gordo, 0);
@@ -251,7 +305,7 @@ var playState={
       }
 
       if (gordo == 13) {
-        avisoGordoText.text = "";
+        avisoText.text = "";
       }
   },
 
@@ -286,14 +340,16 @@ var playState={
     bar.drawRect(0, 0, ancho, 40);
     
 
-    lblScoreText = game.add.text(16,4, "PUNTOS", {fontSize:'10px', fill:'#333'});
-    scoreText= game.add.text(16,16, puntuacion, {fontSize:'20px', fill:'#633'});
-    lblPesoText = game.add.text(146,4, "PESO", {fontSize:'10px', fill:'#333'});
-    pesoText =  game.add.text(146,16, peso + " Kilos", {fontSize:'20px', fill:'#633'});
-    lblJuegaBolasText = game.add.text(242,4, "JUEGOS CON BOLAS", {fontSize:'10px', fill:'#333'});
-    juegaBolasText = game.add.text(242, 16, contGolpesBolas, {fontSize:'20px', fill:'#633'});
+    lblScoreText = game.add.text(15,4, "PUNTOS", {fontSize:'10px', fill:'#333'});
+    scoreText= game.add.text(15,16, puntuacion, {fontSize:'20px', fill:'#633'});
+    lblPesoText = game.add.text(130,4, "PESO", {fontSize:'10px', fill:'#333'});
+    pesoText =  game.add.text(130,16, peso + " Kilos", {fontSize:'20px', fill:'#633'});
+    lblJuegaBolasText = game.add.text(225,4, "JUEGOS", {fontSize:'10px', fill:'#333'});
+    juegaBolasText = game.add.text(225, 16, contGolpesBolas, {fontSize:'20px', fill:'#633'});
+    lblMojadoText = game.add.text(275,4, "MOJADO", {fontSize:'10px', fill:'#333'});
+    mojadoText = game.add.text(275, 16, contMojado, {fontSize:'20px', fill:'#633'});
 
     var estiloAviso = { fontSize: "20px", fill: "#833"};
-    avisoGordoText = game.add.text(380, 16, "", estiloAviso);
+    avisoText = game.add.text(380, 16, "", estiloAviso);
   }, 
 };
