@@ -17,5 +17,12 @@
     </head>
 	<body>
 		<div id="phaser"></div>
+        <script>
+            document.addEventListener("deviceready", onDeviceReady, false);
+            function onDeviceReady()
+            {
+                screen.lockOrientation('landscape');
+            }
+        </script>
     </body>
 </html>

@@ -12,6 +12,7 @@
     <preference name="orientation" value="landscape" />
     
     <plugin name="cordova-plugin-device-motion" />
+    <plugin name="cordova-plugin-screen-orientation" />
  
     <platform name="android" />
     <content src="index.html" />

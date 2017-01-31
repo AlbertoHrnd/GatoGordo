@@ -42,8 +42,6 @@ var playState={
 
     gato.body.collideWorldBounds = true;
     gato.body.immovable = true;
-    //gato.body.bounce.set(0);
-    //gato.body.allowGravity = false;
     gato.body.gravity.y=200+(gordo*30);
     gato.anchor.x = 0.5;
 
