@@ -8,9 +8,9 @@
     	Alberto Hernández
     </author>
 
-    <preference name="orientation" value="landscape" />
     <preference name="fullscreen" value="true" />
-
+    <preference name="orientation" value="landscape" />
+    
     <plugin name="cordova-plugin-device-motion" />
  
     <platform name="android" />

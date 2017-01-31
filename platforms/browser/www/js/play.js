@@ -18,7 +18,8 @@ var playState={
     updateIntervalBolas=1;
     updateIntervalBrocolis=1;
 
-    kkX=0;
+    kkIzq=0;
+    kkDer=ancho;
 
     this.vigilaSensores();
 
@@ -30,14 +31,16 @@ var playState={
     sardinas = game.add.group();
     bolas = game.add.group();
     brocolis = game.add.group();
-    kks = game.add.group();
+    kksDerecha = game.add.group();
+    kksIzquierda = game.add.group();
 
-    game.physics.enable([ gato, sardinas, bolas, brocolis, kks ], Phaser.Physics.ARCADE);
+    game.physics.enable([ gato, sardinas, bolas, brocolis, kksIzquierda, kksDerecha ], Phaser.Physics.ARCADE);
 
     gato.body.collideWorldBounds = true;
     gato.body.immovable = true;
     gato.body.bounce.set(0);
     gato.body.allowGravity = false;
+    gato.anchor.x = 0.5;
 
     sardinas.enableBody = true;
 
@@ -45,7 +48,8 @@ var playState={
 
     brocolis.enableBody = true;
 
-    kks.enableBody = true;    
+    kksDerecha.enableBody = true;
+    kksIzquierda.enableBody = true; 
 
     game.input.onDown.add(this.engordaGato, this);    
   },
@@ -53,20 +57,25 @@ var playState={
   update: function() {
     gato.body.velocity.x = velocidad * factorVelocidad;
 
+    if (velocidad<-0.2) {
+      gato.scale.x = -1;
+    } else if (velocidad>0.2) {
+      gato.scale.x = 1;
+    }
+
     game.physics.arcade.overlap(gato, sardinas, this.comeSardina, null, this);
     game.physics.arcade.overlap(gato, brocolis, this.plantaPino, null, this);
 
     game.physics.arcade.collide(gato, bolas);
-    game.physics.arcade.collide(gato, kks);
+    game.physics.arcade.collide(gato, kksDerecha);
+    game.physics.arcade.collide(gato, kksIzquierda);
     game.physics.arcade.collide(bolas, bolas);
     game.physics.arcade.collide(bolas, sardinas);
     game.physics.arcade.collide(bolas, brocolis);
-    game.physics.arcade.collide(bolas, kks);
+    game.physics.arcade.collide(bolas, kksDerecha);
+    game.physics.arcade.collide(bolas, kksIzquierda);
 
-    if (gato.x < kkX) {
-      gato.body.velocity.x=0;
-      gato.x += 1;
-    }
+    this.controlaKks();
 
     tempSardinas++;
     if (tempSardinas > updateIntervalSardinas){
@@ -146,16 +155,57 @@ var playState={
 
   plantaPino: function(gato, brocoli) {
       brocoli.destroy();
-      kk = kks.create(gato.x-18, alto-25, 'kk');
+      if (velocidad>0) {
+        kk = kksIzquierda.create(gato.x-50, alto-25, 'kk');
+        kkIzq = gato.x - 50;        
+      } else {
+        kk = kksDerecha.create(gato.x+50, alto-25, 'kk');
+        kkDer = gato.x + 50;
+      }
+
       kk.body.moves=false;
-      kkX = gato.x + 15;
-      game.time.events.add(Phaser.Timer.SECOND * 5, this.quitakk, this);
+
+      game.time.events.add(Phaser.Timer.SECOND * 5, this.quitakk, kk);
+  },
+
+  controlaKks: function() {
+    if (velocidad<0) { // El gato va hacia la izquierda
+      if (gato.x - 70 < kkIzq) {
+        gato.body.velocity.x=0;
+        gato.x += 1;
+      }
+    } else { // El gato va hacia la derecha
+      if (gato.x + 40 > kkDer) {
+        gato.body.velocity.x=0;
+        gato.x -= 1;
+      }
+    }
   },
 
   quitakk: function() {
-    kks.callAll('destroy');
-    if (kks.countLiving() === 0) {
-      kkX=0;
+    var kkADestruir = this;
+    this.destroy();
+
+    // Comprobamos kks a la derecha
+    if (kksDerecha.countLiving() === 0) {     // Si no queda ninguna
+      kkDer=ancho;                            // Resetamos al ancho
+    } else {                                  // Si quedan
+      kksDerecha.forEachAlive(function(kk) {  // Para cada kk que quede
+        if (kk.x < kkADestruir.x) {           // Si esa kk está a la izquierda de la destruida
+          kkDer=kk.x;                         // No movemos el tope
+        }
+      }, this)
+    }
+
+    // Comprobamos kks a la izquierda
+    if (kksIzquierda.countLiving() === 0) {   // Si no queda ninguna  
+      kkIzq=0;                                // Reseteamos a 0 
+    } else {                                  // Si quedan
+      kksDerecha.forEachAlive(function(kk) {  // Para cada kk que quede
+        if (kk.x > kkADestruir.x) {           // Si esa kk está a la derecha de la destruida
+          kkIzq=kk.x;                         // No movemos el tope
+        }
+      }, this)
     }
   },
 
