@@ -41,6 +41,8 @@ var playState={
     game.physics.enable([ gato, sardinas, bolas, brocolis, kksIzquierda, kksDerecha, aguas ], Phaser.Physics.ARCADE);
 
     gato.body.collideWorldBounds = true;
+    gato.body.setSize(60, 70, 35, 4); // Hacemos el "cuerpo" (zona de detección de colisiones) más pequeño
+                                      // Un cuadrado de 60x60 a 35 px en x y 4 en y del inicio del sprite
     gato.body.immovable = true;
     gato.body.gravity.y=200+(gordo*30);
     gato.anchor.x = 0.5;
